@@ -2,8 +2,14 @@
 <html>
 <head>
         <!--bower:css-->
+        <link rel="stylesheet" href="/lib/angular-material/angular-material.css" />
         <!--endbower-->
         <!-- bower:js -->
+        <script src="/lib/angular/angular.js"></script>
+        <script src="/lib/angular-animate/angular-animate.js"></script>
+        <script src="/lib/angular-aria/angular-aria.js"></script>
+        <script src="/lib/angular-messages/angular-messages.js"></script>
+        <script src="/lib/angular-material/angular-material.js"></script>
         <!-- endbower -->
         <!-- inject:css-->
         <link rel="stylesheet" href="/css/styles.css">
@@ -18,8 +24,54 @@
 <title>Template</title>
 </head>
 
-<body>
-    hello <%=place%>
+<body ng-app="myApp">
+    <div ng-controller="MainController">
+    <md-toolbar >
+        <span layout-margin layout-padding>Image Extract Utility</span>
+    </md-toolbar>
+    <md-content layout-fill class="mainContent">
+        <md-card md-theme="default-grey">
+          <md-card-header>
+            <md-card-avatar>
+                <img class="md-user-avatar" src="images\rotation.png">
+            </md-card-avatar>
+            <md-card-header-text>
+                <span class="md-title">AAA-LIMG01-MC1</span>
+                <span class="md-subhead">Seventy Twenty Ten Rule 8094</span>
+            </md-card-header-text>
+          </md-card-header>            
+        <md-card-content layout-padding layout-margin>
+            <p>Seventy Twenty Ten Rule 8095</p>
+            <p>Expected File count: 2186</p>
+            <p>75% complete</p> 
+            <p>estimated time left 9 hours 5 minutes</p>
+        </md-card-content>
+        <md-card-actions layout-margin >
+            <md-button layout-margin ng-click="clicked()" class="md-raised md-primary">Ok</md-button>
+        </md-card-actions>     
+        </md-card>
+        <md-card>
+          <md-card-header>
+            <md-card-avatar>
+                <img class="md-user-avatar" src="images\rotation.png">
+            </md-card-avatar>
+            <md-card-header-text>
+                <span class="md-title">AAA-LIMG01-MC1</span>
+                <span class="md-subhead">Seventy Twenty Ten Rule 8094</span>
+            </md-card-header-text>
+          </md-card-header>            
+        <md-card-content layout-padding layout-margin>
+            <p>Seventy Twenty Ten Rule 8094</p>
+            <p>Expected File count: 2186</p>
+            <p>75% complete</p> 
+            <p>estimated time left 9 hours 5 minutes</p>
+        </md-card-content>
+        <md-card-actions layout-margin >
+            <md-button layout-margin ng-click="clicked()" class="md-raised md-primary">Ok</md-button>
+        </md-card-actions>     
+        </md-card>
+    </md-content>
+    </div>    
 </body>
 
 </html> 

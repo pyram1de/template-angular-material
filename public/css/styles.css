@@ -3,3 +3,11 @@ body {
     color: #404040;
     font-family: "Segoe UI WestEuropean","Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",sans-serif;
 }
+
+md-card {
+    /*display: block;*/
+}
+
+md-content.mainContent {
+    min-height: 100v;
+}
