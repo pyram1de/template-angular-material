@@ -79,7 +79,7 @@ function startBrowserSync(){
         logLevel: 'silent', // debug, info
         logPrefix: 'browser-sync',
         notify: true,
-        reloadDelay: 0
+        reloadDelay: 1500
     };
     browserSync(options);
 }

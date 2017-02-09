@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+        <!-- inject:css-->
+        <link rel="stylesheet" href="/css/styles.css">
+        <!-- endinject-->
         <!--bower:css-->
         <link rel="stylesheet" href="/lib/angular-material/angular-material.css" />
         <!--endbower-->
@@ -11,9 +14,7 @@
         <script src="/lib/angular-messages/angular-messages.js"></script>
         <script src="/lib/angular-material/angular-material.js"></script>
         <!-- endbower -->
-        <!-- inject:css-->
-        <link rel="stylesheet" href="/css/styles.css">
-        <!-- endinject-->
+
         <!--inject:js-->
         <script src="/js/app.js"></script>
         <!--endinject-->
@@ -50,7 +51,7 @@
             <md-button layout-margin ng-click="clicked()" class="md-raised md-primary">Ok</md-button>
         </md-card-actions>     
         </md-card>
-        <md-card>
+        <md-card md-theme="default-orange">
           <md-card-header>
             <md-card-avatar>
                 <img class="md-user-avatar" src="images\rotation.png">
