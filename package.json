@@ -13,8 +13,13 @@
   "author": "David Hulmes",
   "license": "MIT",
   "dependencies": {
+    "body-parser": "^1.16.1",
     "ejs": "^2.5.5",
-    "express": "^4.14.1"
+    "express": "^4.14.1",
+    "express-fileupload": "0.0.7",
+    "moment": "^2.17.1",
+    "mongodb": "^2.2.24",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "browser-sync": "^2.18.7",

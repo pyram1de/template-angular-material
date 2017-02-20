@@ -3,7 +3,6 @@
         var app = angular.module('myApp',['ngMaterial']);
         app.controller('MainController',['$scope','$mdDialog', function($scope,$mdDialog){
             $scope.place = "world";
-            console.log('yte');
             $scope.clicked = function(){
                 console.log('in here');
                 alert = $mdDialog.alert({
