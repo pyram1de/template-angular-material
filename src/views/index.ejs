@@ -51,8 +51,24 @@
                 encType="multipart/form-data">  
                         <input type="file" name="csvFile" />
                         <input type="submit" value="upload"/>              
-        </form>     
-        <a href="/download">Download</a>       
+        </form>  
+        <div style="height:200px;overflow-y:auto;">
+        <table style="width:50%">
+            <tr>
+                <th>NINO</th>
+                <th>Surname</th> 
+                <th>PaylocationRef</th>
+            </tr>
+        <%for(var x = 0;x < rejectedData.length;x++){%>        
+            <tr>
+                <td><%=rejectedData[x].nino%></td>
+                <td><%=rejectedData[x].surname%></td>
+                <td><%=rejectedData[x].paylocationref%></td>                 
+            </tr>                    
+        <%}%>
+        </table>
+        </div> 
+        <a href="/download">Download Bulk Joiner Template</a>       
         <a href="/downloadInsert">Download Insert Statements</a>
         </md-card-content>        
         </md-card>
