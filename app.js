@@ -142,15 +142,11 @@ begin   --*/
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
     insert into uss_inst_eform_field values(eformFieldId,eformId,'doj','S','{{doj}}');
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
-    insert into uss_inst_eform_field values(eformFieldId,eformId,'membertypeserv','S','N');
-    eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
-    insert into uss_inst_eform_field values(eformFieldId,eformId,'membertypeserv','S','N');
+    insert into uss_inst_eform_field values(eformFieldId,eformId,'membertypeserv','S','{{membertypeserv}}');
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
     insert into uss_inst_eform_field values(eformFieldId,eformId,'caremembership','S','Y');
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
     insert into uss_inst_eform_field values(eformFieldId,eformId,'careoptout_ae','S','N');
-    eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
-    insert into uss_inst_eform_field values(eformFieldId,eformId,'multiemp','S','Y');
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
     insert into uss_inst_eform_field values(eformFieldId,eformId,'multiemp','S','Y');
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
@@ -193,31 +189,33 @@ end;--*/\r\n
                         data[i].PAYLOCATIONNAME = allInstitutions[x].PAYLOCATIONNAME;
                         data[i].PAYLOCATIONID = allInstitutions[x]._id;
                     }
-                }                
-                var myBuffer = Buffer.from(
-                        script
+                }         
+                //console.log('address: ' + data[i].ADDRESS1);
+                var currentMember = script
                             .replace('{{title}}',data[i].TITLEFG)
                             .replace('{{forenames}}',data[i].FORENAMES.replace("'","''"))
                             .replace('{{surname}}',data[i].SURNAME.replace("'","''"))
                             .replace('{{gender}}',data[i].GENDERFG)
                             .replace('{{maritalstatus}}',data[i].MARITALSTATUSFG)
                             .replace('{{nino}}',data[i].NINO)
-                            .replace('{{dob}}',moment(data[i].DOB,'DD-MMM-YY').format('DD/MM/YYYY'))
+                            .replace('{{dob}}',moment(data[i].DOB,'DD-MMM-YYYY').format('DD/MM/YYYY'))
                             .replace('{{dobver}}',data[i].DOBVERIFIEDFG)
-                            .replace('{{doj}}',moment(data[i].doj._i,'DD-MMM-YY').format('DD/MM/YYYY'))                            
-                            .replace('{{add1}}','CO USS LTD'===data[i].ADDRESS1 ? '': data[i].ADDRESS1.replace("'","''"))
+                            .replace('{{doj}}',moment(data[i].doj._i,'DD-MMM-YY').date(1).format('DD/MM/YYYY'))                            
+                            .replace('{{add1}}','CO USS LTD'===data[i].ADDRESS1 ? '': (data[i].ADDRESS1+'').replace("'","''"))
                             .replace('{{add2}}',data[i].ADDRESS2.replace("'","''"))
                             .replace('{{add3}}',data[i].ADDRESS3.replace("'","''"))
                             .replace('{{add4}}',data[i].ADDRESS4.replace("'","''"))
                             .replace('{{towncity}}',data[i].ADDRESS5.replace("'","''"))
-                            .replace('{{county}}',data[i].COUNTYFG.replace("'","''"))
-                            .replace('{{country}}','CO USS LTD'===data[i].ADDRESS1 ? '': (data[i].COUNTRYFG || 'UK').replace("'","''"))
-                            .replace('{{postcode}}',data[i].POSTCODE.replace("'","''"))
+                            .replace('{{county}}',data[i].COUNTY.replace("'","''"))
+                            .replace('{{country}}','CO USS LTD'===data[i].ADDRESS1 ? '': (data[i].COUNTRY || 'United Kingdom').replace("'","''"))
+                            .replace('{{postcode}}',(''+data[i].POSTCODE).replace("'","''"))
                             .replace('{{altname}}',data[i].PREVSURNAME.replace("'","''"))
                             .replace('{{instpaylocation}}',data[i].PAYLOCATIONID)
                             .replace('{{instname}}',data[i].PAYLOCATIONNAME.replace("'","''"))
-                            .replace('{{personref}}',data[i].PERSONREF1)
-                            );
+                            .replace('{{personref}}',data[i].PERSONREF1)       
+                            .replace('{{membertypeserv}}',data[i].memberisvte);
+
+                var myBuffer = Buffer.from(currentMember);
                 var newBuffer = Buffer.alloc(output.length+myBuffer.length);
                 output.copy(newBuffer,0,0,output.length);
                 myBuffer.copy(newBuffer,output.length,0,myBuffer.length);   
@@ -243,18 +241,28 @@ app.post('/upload', function(req, res) {
         convertedCollection.remove();
         rejectedCollection.remove();
         var members = {};
-        var Member = function(nino, surname, paylocationref, contributiondate) {
+        var Member = function(  nino, 
+                                surname, 
+                                paylocationref, 
+                                contributiondate,
+                                memberisvte) {                                                    
                 return {
                     nino: nino,
                     surname: surname,
                     paylocationref: paylocationref,
-                    contributiondate: contributiondate
+                    contributiondate: contributiondate,
+                    memberisvte: memberisvte==='VTE'?'Y':'N'
                 };
             };                   
         var i = 0;
         for(i = 0;i< lines.length;i=i+1){
             var line = lines[i].split(',');
-            var member = new Member(line[1],line[0],line[2],moment(line[3],'DD-MMM-YY'));
+            var member = new Member(
+                                line[1],
+                                line[0],
+                                line[2],
+                                moment(line[3],'DD-MMM-YY'),
+                                line[7]);
             var currentMember = members[member.nino];
             if(currentMember===undefined){
                 members[member.nino] = member;
@@ -272,20 +280,25 @@ app.post('/upload', function(req, res) {
         var arr = _.toArray(consolidatedMemberList);
 
         arr.forEach(function(person){
-            bulkJoiner.findOne({
-                    'NINO': person.nino,
-                    'upperSurname': (person.surname + '').toUpperCase()
-                },function(err, data){
-                        if(data){
-                            // found someone so log it into the new db
-                            var newdata = data;
-                            newdata.doj = person.contributiondate;
-                            newdata.paylocationref = person.paylocationref;
-                            convertedCollection.insert(newdata);
-                        } else {
-                            rejectedCollection.insert(person);
-                        }
-                }); 
+            if(person.nino&&person.nino.indexOf('TN')===0){
+                rejectedCollection.insert(person);
+            } else {
+                bulkJoiner.findOne({
+                        'NINO': person.nino // now only matching on NINO
+                        //,'upperSurname': (person.surname + '').toUpperCase() 
+                    },function(err, data){
+                            if(data){
+                                // found someone so log it into the new db
+                                var newdata = data;
+                                newdata.doj = person.contributiondate;
+                                newdata.paylocationref = person.paylocationref;
+                                newdata.memberisvte = person.memberisvte;
+                                convertedCollection.insert(newdata);
+                            } else {
+                                rejectedCollection.insert(person);
+                            }
+                    }); 
+            }
         });                  
     });
   res.redirect('/');
