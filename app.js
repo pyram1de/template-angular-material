@@ -8,9 +8,17 @@ var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/refereces';
 var isConnected = false;
 var db = {};
+var persondb = {};
+
+var personUrl = 'mongodb://localhost:27017/test';
 MongoClient.connect(url, function(err, theDB){
     db = theDB;
     console.log('connected to db');
+});
+
+MongoClient.connect(personUrl, function(err, pdb){
+    persondb = pdb;
+    console.log('connected to person db');
 });
 
 var writeReferenceFile = function(referenceType, line){    
@@ -20,7 +28,7 @@ var writeReferenceFile = function(referenceType, line){
         } else if (referenceType==='paylocation'){
             collection = db.collection('paylocation');
         } else if (referenceType==='person'){ 
-            collection = db.collection('person');
+            collection = persondb.collection('bulk_joiner');
         } else {
             fs.appendFile(referencesFile, 'N/A' + ',' + referenceType + ',' + line + '\r\n');
             return;
@@ -30,7 +38,22 @@ var writeReferenceFile = function(referenceType, line){
         }, function(err, data){
             if(!err){                
                 if(data){
-                    fs.appendFile(referencesFile, data.reference + ',' + referenceType + ',' + line + '\r\n');
+                    if(referenceType==='person'){
+                        fs.appendFile(referencesFile, data.PERSONREF1 + '-' + data.NINO + ',' + referenceType + ',' + line + '\r\n');
+                    } else if (referenceType==='folder'){
+                        var pcol = persondb.collection('bulk_joiner');
+                        pcol.findOne({"PERSONREF1":data.reference},
+                        function(err, moreData){
+                            if(!err){
+                                if(moreData){
+                                    fs.appendFile(referencesFile, data.reference + '-' + moreData.NINO + ',' + referenceType + ',' + line + '\r\n');  
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        fs.appendFile(referencesFile, data.reference + ',' + referenceType + ',' + line + '\r\n');
+                    }
                 } else {
                     fs.appendFile(referencesFile, 'null' + ',' + referenceType + ',' + line + '\r\n');
                 }
@@ -45,7 +68,8 @@ fs.readdir(sourceDir, function(err, files){
     fs.mkdir(targetDir,function(err){
         if(err)
             console.log(err);
-        
+        if(!files)
+            return;
         for(var incb = 0;incb<files.length;incb++){                
             var stats = fs.statSync(sourceDir + files[incb]);        
             if(stats.isDirectory()){
