@@ -117,11 +117,11 @@ app.get('/downloadInsert', function(req, res){
             var bytesWritten = 0;
             var offset = 0;
             var script = `
-/*
+
 declare
     eformId number(9,0):=0;
     eformFieldId number(9,0):=0;
-begin   --*/
+begin   
     eformId:= USS_INST_EFORM_SEQ.NEXTVAL();
     insert into uss_inst_eform values(eformId, 'UPMClient', 116, 'JOINCARE', 'CA_CREATE_NEW_JOINERS', NULL, SYSDATE, NULL, NULL);
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
@@ -176,8 +176,9 @@ begin   --*/
     insert into uss_inst_eform_field values(eformFieldId,eformId,'county','S','{{county}}');
     eformFieldId:= USS_INST_EFORM_FIELD_SEQ.NEXTVAL();
     insert into uss_inst_eform_field values(eformFieldId,eformId,'personref','S','{{personref}}');
-    /*   
-end;--*/\r\n
+       
+end;\r\n
+/\r\n
             `;
             for(var i = 0;i<data.length;i++){                
                 var insts;
@@ -192,8 +193,8 @@ end;--*/\r\n
                 //console.log('address: ' + data[i].ADDRESS1);
                 var currentMember = script
                             .replace('{{title}}',data[i].TITLEFG)
-                            .replace('{{forenames}}',data[i].FORENAMES.replace("'","''"))
-                            .replace('{{surname}}',data[i].SURNAME.replace("'","''"))
+                            .replace('{{forenames}}',(data[i].FORENAMES+'').replace("'","''"))
+                            .replace('{{surname}}',(data[i].SURNAME+'').replace("'","''"))
                             .replace('{{gender}}',data[i].GENDERFG)
                             .replace('{{maritalstatus}}',data[i].MARITALSTATUSFG)
                             .replace('{{nino}}',data[i].NINO)
@@ -201,10 +202,10 @@ end;--*/\r\n
                             .replace('{{dobver}}',data[i].DOBVERIFIEDFG)
                             .replace('{{doj}}',moment(data[i].doj._i,'DD-MMM-YY').date(1).format('DD/MM/YYYY'))                            
                             .replace('{{add1}}','CO USS LTD'===data[i].ADDRESS1 ? '': (data[i].ADDRESS1+'').replace("'","''"))
-                            .replace('{{add2}}',data[i].ADDRESS2.replace("'","''"))
-                            .replace('{{add3}}',data[i].ADDRESS3.replace("'","''"))
-                            .replace('{{add4}}',data[i].ADDRESS4.replace("'","''"))
-                            .replace('{{towncity}}',data[i].ADDRESS5.replace("'","''"))
+                            .replace('{{add2}}',(data[i].ADDRESS2+'').replace("'","''"))
+                            .replace('{{add3}}',(data[i].ADDRESS3+'').replace("'","''"))
+                            .replace('{{add4}}',(data[i].ADDRESS4+'').replace("'","''"))
+                            .replace('{{towncity}}',(data[i].ADDRESS5+'').replace("'","''"))
                             .replace('{{county}}',data[i].COUNTY.replace("'","''"))
                             .replace('{{country}}','CO USS LTD'===data[i].ADDRESS1 ? '': (data[i].COUNTRY || 'United Kingdom').replace("'","''"))
                             .replace('{{postcode}}',(''+data[i].POSTCODE).replace("'","''"))
