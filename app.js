@@ -1,7 +1,7 @@
 var fs = require('fs');
-var targetDir = 'e:\\temp\\testing\\';
-var sourceDir = 'z:\\';
-var referencesFile = 'e:\\temp\\referencesFile.csv';
+var targetDir = 'e:\\temp\\sample_extract\\';
+var sourceDir = 'V:\\CalculationsNew\\';
+var referencesFile = 'referencesFile.csv';
 var newLine = '\r\n';
 var fir=0,sec=0,las = 0;
 var MongoClient = require('mongodb').MongoClient;
@@ -30,7 +30,7 @@ var writeReferenceFile = function(referenceType, line){
         } else if (referenceType==='person'){ 
             collection = persondb.collection('bulk_joiner');
         } else {
-            fs.appendFile(referencesFile, 'N/A' + ',' + referenceType + ',' + line + '\r\n');
+            fs.appendFile(targetDir+referencesFile, 'N/A' + ',' + referenceType + ',' + line + '\r\n');
             return;
         }
         collection.findOne({
@@ -39,29 +39,29 @@ var writeReferenceFile = function(referenceType, line){
             if(!err){                
                 if(data){
                     if(referenceType==='person'){
-                        fs.appendFile(referencesFile, data.PERSONREF1 + '-' + data.NINO + ',' + referenceType + ',' + line + '\r\n');
+                        fs.appendFile(targetDir+referencesFile, data.PERSONREF1 + '-' + data.NINO + ',' + referenceType + ',' + line + '\r\n');
                     } else if (referenceType==='folder'){
                         var pcol = persondb.collection('bulk_joiner');
                         pcol.findOne({"PERSONREF1":data.reference},
                         function(err, moreData){
                             if(!err){
                                 if(moreData){
-                                    fs.appendFile(referencesFile, data.reference + '-' + moreData.NINO + ',' + referenceType + ',' + line + '\r\n');  
+                                    fs.appendFile(targetDir+referencesFile, data.reference + '-' + moreData.NINO + ',' + referenceType + ',' + line + '\r\n');  
                                 }
                             }
                         });
                     }
                     else {
-                        fs.appendFile(referencesFile, data.reference + ',' + referenceType + ',' + line + '\r\n');
+                        fs.appendFile(targetDir+referencesFile, data.reference + ',' + referenceType + ',' + line + '\r\n');
                     }
                 } else {
-                    fs.appendFile(referencesFile, 'null' + ',' + referenceType + ',' + line + '\r\n');
+                    fs.appendFile(targetDir+referencesFile, 'null' + ',' + referenceType + ',' + line + '\r\n');
                 }
             }            
             else {
                 console.log(err);
             }
-        });            
+        });
 }
 
 fs.readdir(sourceDir, function(err, files){   
@@ -80,7 +80,11 @@ fs.readdir(sourceDir, function(err, files){
                 // find the csv file from each folder and process them.                
                 var calcDirFiles = fs.readdirSync(calcDirFileDirectory);                
                 for(var incc = 0;incc < calcDirFiles.length; incc = incc + 1){
+                    if(calcDirFiles[incc]==='USS Ltd'){
+                        break;
+                    }
                     if(calcDirFiles[incc].substr(-4)==='.csv'){
+                        
                         var theCSVLocation = calcDirFiles[incc];
                         var theCSV = fs.readFileSync(sourceDir+calcDir+'\\'+theCSVLocation, 'utf8');
                         // make directory.
@@ -88,11 +92,11 @@ fs.readdir(sourceDir, function(err, files){
                         // read 10 items from the csv.
                         var theCSVbyRow = theCSV.split(newLine);
                         for(var incd=0;(incd < theCSVbyRow.length) && (incd < 100); incd++){
-                            var lineData = theCSVbyRow[incd].split(',');
+                            var random = getRandomInt(0,theCSVbyRow.length-1);
+                            var lineData = theCSVbyRow[random].split(',');
                             var fileName = lineData[1];
                             fs.appendFileSync(targetDir+calcDir+'\\'+theCSVLocation,lineData+newLine,'utf8');
-                            
-                            if(fileName){   
+                            if(fileName){
                                 if(theCSVLocation.indexOf('UPMPERSON')>0){
                                     writeReferenceFile('person', lineData);
                                 } else if(theCSVLocation.indexOf('UPMFOLDER')>0){
@@ -102,17 +106,13 @@ fs.readdir(sourceDir, function(err, files){
                                 } else {
                                     writeReferenceFile(null, lineData);
                                 }
-
                                 //var file = fs.readFileSync(sourceDir+calcDir+'\\'+fileName);
                                 //fs.writeFileSync(targetDir+calcDir+'\\'+fileName,file);
-
-
-                                /*
                                 fs.createReadStream(
                                     sourceDir+calcDir+'\\'+fileName
                                 ).pipe(fs.createWriteStream(
                                     targetDir+calcDir+'\\'+fileName
-                                ));*/
+                                ));
                             } else {
                                     console.log('***********************');
                                     console.log('NO filename');
@@ -131,6 +131,12 @@ fs.readdir(sourceDir, function(err, files){
     });   
     
 });         
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 
     /*
 for(var inca = 0; inca < calcDirFiles.length-1;inca++){
